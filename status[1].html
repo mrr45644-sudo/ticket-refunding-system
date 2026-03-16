@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RailRefund – Track Refund Status</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #111419;
+      --card: #161b24;
+      --border: #1e2733;
+      --accent: #e8c56b;
+      --accent2: #4a9eff;
+      --danger: #ff5a5a;
+      --success: #4ecb71;
+      --warning: #ffaa33;
+      --text: #e8eaf0;
+      --muted: #6b7a92;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(255,255,255,0.012) 120px),
+        repeating-linear-gradient(180deg, transparent, transparent 59px, rgba(255,255,255,0.012) 60px);
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,16,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.7rem; letter-spacing: 3px;
+      color: var(--accent); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-size: 0.85rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: rgba(232,197,107,0.1); }
+
+    /* Search hero */
+    .search-hero {
+      position: relative; z-index: 1;
+      background: linear-gradient(135deg, #0d1118 0%, #0f1a2a 50%, #0a1520 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 52px 2rem 44px;
+      text-align: center;
+    }
+    .search-hero::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    }
+    .page-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.25);
+      color: var(--accent2); font-size: 0.72rem; letter-spacing: 2px;
+      font-weight: 600; padding: 5px 14px; border-radius: 20px;
+      text-transform: uppercase; margin-bottom: 18px;
+    }
+    .page-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      letter-spacing: 5px; color: var(--text); margin-bottom: 10px;
+    }
+    .page-title span { color: var(--accent2); }
+    .page-sub { color: var(--muted); font-size: 0.95rem; max-width: 440px; margin: 0 auto 32px; }
+
+    /* Search box */
+    .search-box {
+      max-width: 600px; margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .search-tabs {
+      display: flex; gap: 6px; margin-bottom: 20px;
+      background: var(--surface);
+      border-radius: 8px; padding: 4px;
+    }
+    .stab {
+      flex: 1; padding: 8px 12px;
+      background: none; border: none;
+      color: var(--muted); font-family: var(--font-body);
+      font-size: 0.82rem; font-weight: 500;
+      border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .stab.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+    .search-input-row {
+      display: flex; gap: 10px;
+    }
+    .search-input-row input {
+      flex: 1; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: var(--font-body);
+      font-size: 0.9rem; padding: 11px 16px; outline: none;
+      font-family: var(--font-mono);
+      letter-spacing: 2px;
+      transition: border-color 0.2s;
+    }
+    .search-input-row input:focus { border-color: rgba(74,158,255,0.5); }
+    .search-input-row input::placeholder { font-family: var(--font-body); letter-spacing: 0; color: var(--muted); }
+    .btn-search {
+      background: var(--accent2); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
+      padding: 11px 22px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px; white-space: nowrap;
+    }
+    .btn-search:hover { background: #6ab5ff; transform: translateY(-1px); }
+
+    /* Main wrap */
+    .main-wrap {
+      position: relative; z-index: 1;
+      max-width: 1000px; margin: 0 auto;
+      padding: 40px 2rem 80px;
+    }
+
+    /* Status result card */
+    .result-area { display: none; }
+    .result-area.show { display: block; animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .result-header {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      padding: 24px 28px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-id { font-family: var(--font-mono); font-size: 1.5rem; color: var(--accent); letter-spacing: 3px; }
+    .result-sub { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.5px;
+      padding: 6px 14px; border-radius: 20px;
+    }
+    .status-badge.processing { background: rgba(255,170,51,0.12); border: 1px solid rgba(255,170,51,0.3); color: var(--warning); }
+    .status-badge.approved { background: rgba(78,203,113,0.12); border: 1px solid rgba(78,203,113,0.3); color: var(--success); }
+    .status-badge.rejected { background: rgba(255,90,90,0.1); border: 1px solid rgba(255,90,90,0.25); color: var(--danger); }
+    .status-badge.completed { background: rgba(74,158,255,0.1); border: 1px solid rgba(74,158,255,0.25); color: var(--accent2); }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; animation: pulse 1.5s infinite; }
+    .pulse.orange { background: var(--warning); }
+    .pulse.green { background: var(--success); }
+    .pulse.blue { background: var(--accent2); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* Progress tracker */
+    .progress-track {
+      background: var(--card); border: 1px solid var(--border); border-top: none;
+      padding: 36px 28px;
+    }
+    .track-title { font-size: 0.72rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 28px; }
+    .track-steps {
+      display: flex; gap: 0;
+      position: relative;
+    }
+    .track-step {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px;
+      position: relative;
+    }
+    .track-step:not(:last-child)::after {
+      content: ''; position: absolute;
+      top: 20px; left: calc(50% + 20px);
+      width: calc(100% - 40px); height: 3px;
+      background: var(--border);
+    }
+    .track-step.done:not(:last-child)::after { background: linear-gradient(90deg, var(--success), var(--success)); }
+    .track-step.active:not(:last-child)::after { background: linear-gradient(90deg, var(--success), var(--border)); }
+    .ts-circle {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; position: relative; z-index: 1;
+      transition: all 0.3s;
+    }
+    .track-step.done .ts-circle { border-color: var(--success); background: rgba(78,203,113,0.1); }
+    .track-step.active .ts-circle { border-color: var(--warning); background: rgba(255,170,51,0.1); box-shadow: 0 0 0 6px rgba(255,170,51,0.08); }
+    .ts-label { font-size: 0.72rem; color: var(--muted); text-align: center; line-height: 1.4; }
+    .track-step.done .ts-label { color: var(--success); }
+    .track-step.active .ts-label { color: var(--warning); font-weight: 500; }
+    .ts-time { font-size: 0.65rem; color: var(--muted); opacity: 0.7; }
+
+    /* Details grid */
+    .details-grid {
+      background: var(--card); border: 1px solid var(--border); border-top: none;
+      border-radius: 0 0 16px 16px;
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .detail-col { padding: 24px 28px; }
+    .detail-col:first-child { border-right: 1px solid var(--border); }
+    .detail-col-title { font-size: 0.72rem; color: var(--accent2); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 16px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.83rem; }
+    .detail-row:last-child { border: none; }
+    .detail-row .dk { color: var(--muted); }
+    .detail-row .dv { color: var(--text); font-weight: 500; }
+    .detail-row .dv.mono { font-family: var(--font-mono); font-size: 0.78rem; }
+    .detail-row .dv.amt { color: var(--accent); font-family: var(--font-mono); font-size: 0.92rem; }
+
+    /* Activity log */
+    .activity-card {
+      margin-top: 24px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    }
+    .activity-head { border-bottom: 1px solid var(--border); padding: 16px 24px; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .activity-body { padding: 0; }
+    .log-item {
+      display: flex; gap: 16px; padding: 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      align-items: flex-start;
+    }
+    .log-item:last-child { border: none; }
+    .log-dot-col { display: flex; flex-direction: column; align-items: center; padding-top: 3px; }
+    .log-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .log-dot.green { background: var(--success); }
+    .log-dot.orange { background: var(--warning); }
+    .log-dot.blue { background: var(--accent2); }
+    .log-dot.grey { background: var(--border); }
+    .log-line { flex: 1; width: 1px; background: var(--border); margin: 4px 0; min-height: 20px; }
+    .log-item:last-child .log-line { display: none; }
+    .log-content { flex: 1; }
+    .log-event { font-size: 0.84rem; font-weight: 500; color: var(--text); }
+    .log-desc { font-size: 0.76rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+    .log-time { font-size: 0.7rem; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; padding-top: 3px; }
+
+    /* Help bar */
+    .help-bar {
+      margin-top: 24px; background: rgba(74,158,255,0.05);
+      border: 1px solid rgba(74,158,255,0.15);
+      border-radius: 12px; padding: 18px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    }
+    .help-bar p { font-size: 0.83rem; color: var(--muted); }
+    .help-bar p strong { color: var(--text); }
+    .btn-outline {
+      background: none; border: 1px solid var(--border); color: var(--text);
+      font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+      padding: 8px 18px; border-radius: 7px; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; white-space: nowrap;
+    }
+    .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 80px 20px;
+    }
+    .empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .empty-state p { color: var(--muted); font-size: 0.85rem; max-width: 340px; margin: 0 auto; }
+
+    /* Recent searches */
+    .recent-section {
+      margin-top: 48px;
+    }
+    .section-head {
+      font-size: 0.72rem; color: var(--muted); letter-spacing: 1.5px;
+      text-transform: uppercase; font-weight: 600;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .sample-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .sample-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .sample-card:hover { border-color: rgba(74,158,255,0.3); transform: translateY(-2px); }
+    .sc-id { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent); letter-spacing: 2px; }
+    .sc-pnr { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    .sc-status { margin-top: 12px; display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+    .sc-status.p { background: rgba(255,170,51,0.1); color: var(--warning); }
+    .sc-status.a { background: rgba(78,203,113,0.1); color: var(--success); }
+    .sc-status.c { background: rgba(74,158,255,0.1); color: var(--accent2); }
+    .sc-amt { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text); margin-top: 8px; }
+
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 28px 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p { font-size: 0.78rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      border-radius: 10px; padding: 14px 18px; font-size: 0.83rem;
+      color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transform: translateY(80px); opacity: 0; transition: all 0.3s ease; max-width: 300px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 768px) {
+      .details-grid { grid-template-columns: 1fr; }
+      .detail-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+      .sample-cards { grid-template-columns: 1fr; }
+      .track-steps { flex-direction: column; gap: 0; }
+      .track-step { flex-direction: row; gap: 16px; align-items: flex-start; }
+      .track-step:not(:last-child)::after { display: none; }
+      .help-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="14" rx="3" stroke="#e8c56b" stroke-width="1.8"/><rect x="8" y="11" width="5" height="4" rx="1" fill="#e8c56b" opacity="0.7"/><rect x="15" y="11" width="5" height="4" rx="1" fill="#e8c56b" opacity="0.7"/><path d="M7 22 L5 26 M21 22 L23 26" stroke="#e8c56b" stroke-width="1.8" stroke-linecap="round"/><path d="M4 18 H24" stroke="#e8c56b" stroke-width="1.2" opacity="0.4"/></svg>
+    RAILREFUND
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Refund Request</a>
+    <a href="status.html" class="active">Track Status</a>
+    <a href="policy.html">Policy & FAQ</a>
+  </div>
+</nav>
+
+<!-- Search Hero -->
+<div class="search-hero">
+  <div class="page-label">🔍 Real-Time Tracking</div>
+  <h1 class="page-title">TRACK <span>STATUS</span></h1>
+  <p class="page-sub">Enter your Refund Reference ID or PNR number to get instant status updates.</p>
+
+  <div class="search-box">
+    <div class="search-tabs">
+      <button class="stab active" onclick="setTab('ref', this)">Reference ID</button>
+      <button class="stab" onclick="setTab('pnr', this)">PNR Number</button>
+      <button class="stab" onclick="setTab('mobile', this)">Mobile Number</button>
+    </div>
+    <div class="search-input-row">
+      <input type="text" id="search-input" placeholder="e.g. RR-547823" />
+      <button class="btn-search" onclick="doSearch()">🔍 Track</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-wrap">
+
+  <!-- Result area -->
+  <div class="result-area" id="result-area">
+
+    <!-- Header -->
+    <div class="result-header" id="res-header">
+      <div>
+        <div class="result-id" id="res-id">RR-547823</div>
+        <div class="result-sub" id="res-sub">PNR: 4521367890 · Submitted 14 Mar 2025</div>
+      </div>
+      <span class="status-badge processing" id="status-badge">
+        <div class="pulse orange"></div>
+        Under Review
+      </span>
+    </div>
+
+    <!-- Progress track -->
+    <div class="progress-track">
+      <div class="track-title">Refund Progress</div>
+      <div class="track-steps" id="track-steps">
+        <div class="track-step done">
+          <div class="ts-circle">✅</div>
+          <div class="ts-label">Submitted<div class="ts-time">14 Mar, 9:21 AM</div></div>
+        </div>
+        <div class="track-step done">
+          <div class="ts-circle">✅</div>
+          <div class="ts-label">PNR Verified<div class="ts-time">14 Mar, 11:05 AM</div></div>
+        </div>
+        <div class="track-step active">
+          <div class="ts-circle">⏳</div>
+          <div class="ts-label">Under Review<div class="ts-time">In Progress</div></div>
+        </div>
+        <div class="track-step">
+          <div class="ts-circle">💳</div>
+          <div class="ts-label">Approved<div class="ts-time">Pending</div></div>
+        </div>
+        <div class="track-step">
+          <div class="ts-circle">🏦</div>
+          <div class="ts-label">Amount Credited<div class="ts-time">Pending</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details grid -->
+    <div class="details-grid">
+      <div class="detail-col">
+        <div class="detail-col-title">Ticket Information</div>
+        <div class="detail-row"><span class="dk">PNR Number</span><span class="dv mono" id="d-pnr">4521367890</span></div>
+        <div class="detail-row"><span class="dk">Train</span><span class="dv" id="d-train">12951 – Mumbai Rajdhani</span></div>
+        <div class="detail-row"><span class="dk">Route</span><span class="dv" id="d-route">NDLS → CSMT</span></div>
+        <div class="detail-row"><span class="dk">Journey Date</span><span class="dv" id="d-date">18 Mar 2025</span></div>
+        <div class="detail-row"><span class="dk">Class</span><span class="dv" id="d-class">2A – Second AC</span></div>
+        <div class="detail-row"><span class="dk">Reason</span><span class="dv" id="d-reason">Train Delay / Cancellation</span></div>
+      </div>
+      <div class="detail-col">
+        <div class="detail-col-title">Refund Details</div>
+        <div class="detail-row"><span class="dk">Original Fare</span><span class="dv mono" id="d-fare">₹2,400</span></div>
+        <div class="detail-row"><span class="dk">Cancellation Charges</span><span class="dv" id="d-charges" style="color:var(--danger)">– ₹360</span></div>
+        <div class="detail-row"><span class="dk">Refund Amount</span><span class="dv amt" id="d-refund">₹2,040</span></div>
+        <div class="detail-row"><span class="dk">Payment Method</span><span class="dv" id="d-pay">UPI – myid@upi</span></div>
+        <div class="detail-row"><span class="dk">Submitted On</span><span class="dv mono" id="d-submitted">14 Mar 2025</span></div>
+        <div class="detail-row"><span class="dk">Expected By</span><span class="dv" id="d-eta" style="color:var(--success)">17 Mar 2025</span></div>
+      </div>
+    </div>
+
+    <!-- Activity log -->
+    <div class="activity-card">
+      <div class="activity-head">📋 Activity Log</div>
+      <div class="activity-body" id="activity-log">
+        <div class="log-item">
+          <div class="log-dot-col"><div class="log-dot green"></div><div class="log-line"></div></div>
+          <div class="log-content"><div class="log-event">Refund Request Submitted</div><div class="log-desc">Request received and ticket details recorded in the system.</div></div>
+          <div class="log-time">14 Mar, 9:21 AM</div>
+        </div>
+        <div class="log-item">
+          <div class="log-dot-col"><div class="log-dot green"></div><div class="log-line"></div></div>
+          <div class="log-content"><div class="log-event">PNR Verified Successfully</div><div class="log-desc">Ticket PNR 4521367890 verified with IRCTC database. All details match.</div></div>
+          <div class="log-time">14 Mar, 11:05 AM</div>
+        </div>
+        <div class="log-item">
+          <div class="log-dot-col"><div class="log-dot orange"></div><div class="log-line"></div></div>
+          <div class="log-content"><div class="log-event">Under Agent Review</div><div class="log-desc">Request assigned to refund specialist. Estimated completion: 24 hours.</div></div>
+          <div class="log-time">14 Mar, 2:30 PM</div>
+        </div>
+        <div class="log-item">
+          <div class="log-dot-col"><div class="log-dot grey"></div><div class="log-line"></div></div>
+          <div class="log-content"><div class="log-event">Approval Pending</div><div class="log-desc">Awaiting final approval from finance team before initiating transfer.</div></div>
+          <div class="log-time">–</div>
+        </div>
+        <div class="log-item">
+          <div class="log-dot-col"><div class="log-dot grey"></div></div>
+          <div class="log-content"><div class="log-event">Amount Credited</div><div class="log-desc">Refund will be credited to your registered UPI / bank account.</div></div>
+          <div class="log-time">–</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help bar -->
+    <div class="help-bar">
+      <p><strong>Need help with this refund?</strong> Contact our support team with your Reference ID for priority assistance.</p>
+      <div style="display:flex;gap:10px">
+        <a href="policy.html#contact" class="btn-outline">📞 Contact Support</a>
+        <a href="index.html" class="btn-outline" style="border-color:rgba(232,197,107,0.3);color:var(--accent)">+ New Request</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Empty state (shown by default) -->
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">🔎</div>
+    <h3>Enter your Reference ID or PNR</h3>
+    <p>Use the search box above to look up the current status of your refund request.</p>
+  </div>
+
+  <!-- Sample Cards -->
+  <div class="recent-section" id="sample-section">
+    <div class="section-head">Sample Refund Statuses</div>
+    <div class="sample-cards">
+      <div class="sample-card" onclick="loadSample('RR-547823','processing')">
+        <div class="sc-id">RR-547823</div>
+        <div class="sc-pnr">PNR: 4521367890</div>
+        <div class="sc-status p">⏳ Under Review</div>
+        <div class="sc-amt">₹2,040 expected</div>
+      </div>
+      <div class="sample-card" onclick="loadSample('RR-389102','approved')">
+        <div class="sc-id">RR-389102</div>
+        <div class="sc-pnr">PNR: 6789023412</div>
+        <div class="sc-status a">✓ Approved</div>
+        <div class="sc-amt">₹1,620 approved</div>
+      </div>
+      <div class="sample-card" onclick="loadSample('RR-214560','completed')">
+        <div class="sc-id">RR-214560</div>
+        <div class="sc-pnr">PNR: 9812345678</div>
+        <div class="sc-status c">💳 Credited</div>
+        <div class="sc-amt">₹3,200 credited</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2025 RailRefund Portal</p>
+  <div class="footer-links">
+    <a href="index.html">New Refund</a>
+    <a href="policy.html">Policy</a>
+    <a href="policy.html#contact">Contact</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let searchTab = 'ref';
+
+  // Pre-fill from previous page if available
+  window.addEventListener('DOMContentLoaded', () => {
+    const lastId = localStorage.getItem('lastRefundId');
+    if (lastId) {
+      document.getElementById('search-input').value = lastId;
+    }
+  });
+
+  function setTab(tab, el) {
+    searchTab = tab;
+    document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const input = document.getElementById('search-input');
+    if (tab === 'ref') input.placeholder = 'e.g. RR-547823';
+    else if (tab === 'pnr') input.placeholder = 'e.g. 4521367890';
+    else input.placeholder = 'e.g. 9876543210';
+  }
+
+  function doSearch() {
+    const val = document.getElementById('search-input').value.trim();
+    if (!val) { showToast('Please enter a search value.'); return; }
+    // Simulate search
+    if (val.toUpperCase().startsWith('RR-')) {
+      const code = val.toUpperCase();
+      if (code === 'RR-389102') loadSample('RR-389102', 'approved');
+      else if (code === 'RR-214560') loadSample('RR-214560', 'completed');
+      else loadSample(code, 'processing');
+    } else if (/^\d{10}$/.test(val)) {
+      loadSample('RR-' + Math.floor(100000 + Math.random()*900000), 'processing');
+    } else {
+      showToast('No refund found for this ID. Please check and try again.');
+    }
+  }
+
+  function loadSample(id, statusType) {
+    document.getElementById('search-input').value = id;
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('sample-section').style.display = 'none';
+
+    const data = {
+      'processing': {
+        badge: `<div class="pulse orange"></div> Under Review`,
+        badgeClass: 'processing',
+        sub: 'PNR: 4521367890 · Submitted 14 Mar 2025',
+        steps: [true, true, 'active', false, false],
+        fare: '₹2,400', charges: '– ₹360', refund: '₹2,040',
+        eta: '17 Mar 2025', train: '12951 – Mumbai Rajdhani',
+        route: 'NDLS → CSMT', date: '18 Mar 2025', cls: '2A – Second AC',
+        reason: 'Train Delay / Cancellation'
+      },
+      'approved': {
+        badge: `<div class="pulse green"></div> Approved`,
+        badgeClass: 'approved',
+        sub: 'PNR: 6789023412 · Submitted 12 Mar 2025',
+        steps: [true, true, true, 'active', false],
+        fare: '₹1,800', charges: '– ₹180', refund: '₹1,620',
+        eta: '18 Mar 2025', train: '22119 – AC Express',
+        route: 'PUNE → HYB', date: '15 Mar 2025', cls: '3A – Third AC',
+        reason: 'Personal Reasons'
+      },
+      'completed': {
+        badge: `<div class="pulse blue"></div> Credited`,
+        badgeClass: 'completed',
+        sub: 'PNR: 9812345678 · Submitted 10 Mar 2025',
+        steps: [true, true, true, true, 'active'],
+        fare: '₹3,200', charges: '– ₹0', refund: '₹3,200',
+        eta: '13 Mar 2025', train: '12301 – Howrah Rajdhani',
+        route: 'HWH → NDLS', date: '11 Mar 2025', cls: '1A – First AC',
+        reason: 'Train Cancelled by Railways'
+      }
+    };
+
+    const d = data[statusType] || data['processing'];
+    document.getElementById('res-id').textContent = id;
+    document.getElementById('res-sub').textContent = d.sub;
+    const sb = document.getElementById('status-badge');
+    sb.className = 'status-badge ' + d.badgeClass;
+    sb.innerHTML = d.badge;
+
+    // Update details
+    document.getElementById('d-fare').textContent = d.fare;
+    document.getElementById('d-charges').textContent = d.charges;
+    document.getElementById('d-refund').textContent = d.refund;
+    document.getElementById('d-eta').textContent = d.eta;
+    document.getElementById('d-train').textContent = d.train;
+    document.getElementById('d-route').textContent = d.route;
+    document.getElementById('d-date').textContent = d.date;
+    document.getElementById('d-class').textContent = d.cls;
+    document.getElementById('d-reason').textContent = d.reason;
+    document.getElementById('d-pnr').textContent = d.sub.split(' ')[1];
+
+    const ra = document.getElementById('result-area');
+    ra.classList.add('show');
+    ra.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>

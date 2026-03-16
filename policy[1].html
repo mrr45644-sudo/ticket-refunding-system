@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RailRefund – Policy & FAQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #111419;
+      --card: #161b24;
+      --border: #1e2733;
+      --accent: #e8c56b;
+      --accent2: #4a9eff;
+      --success: #4ecb71;
+      --danger: #ff5a5a;
+      --warning: #ffaa33;
+      --text: #e8eaf0;
+      --muted: #6b7a92;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(255,255,255,0.012) 120px),
+        repeating-linear-gradient(180deg, transparent, transparent 59px, rgba(255,255,255,0.012) 60px);
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,16,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+    }
+    .nav-logo { font-family: var(--font-display); font-size: 1.7rem; letter-spacing: 3px; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.85rem; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: all 0.2s; }
+    .nav-links a:hover { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: rgba(232,197,107,0.1); }
+
+    /* Hero */
+    .page-hero {
+      position: relative; z-index: 1;
+      background: linear-gradient(135deg, #0d1118, #121e14, #0a1218);
+      border-bottom: 1px solid var(--border);
+      padding: 52px 2rem 44px; text-align: center;
+    }
+    .page-hero::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--success), transparent);
+    }
+    .page-label { display: inline-flex; align-items: center; gap: 8px; background: rgba(78,203,113,0.08); border: 1px solid rgba(78,203,113,0.25); color: var(--success); font-size: 0.72rem; letter-spacing: 2px; font-weight: 600; padding: 5px 14px; border-radius: 20px; text-transform: uppercase; margin-bottom: 18px; }
+    .page-title { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.8rem); letter-spacing: 5px; color: var(--text); margin-bottom: 10px; }
+    .page-title span { color: var(--success); }
+    .page-sub { color: var(--muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto; }
+
+    /* Tab nav */
+    .tab-bar {
+      position: relative; z-index: 1;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; justify-content: center; gap: 0; padding: 0 2rem;
+    }
+    .tab-btn {
+      background: none; border: none; border-bottom: 3px solid transparent;
+      color: var(--muted); font-family: var(--font-body); font-size: 0.85rem;
+      font-weight: 500; padding: 14px 22px; cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Main */
+    .main-wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 40px 2rem 80px; }
+
+    /* Tab panels */
+    .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Section header */
+    .sec-header { margin-bottom: 28px; }
+    .sec-header h2 { font-family: var(--font-display); font-size: 1.8rem; letter-spacing: 3px; color: var(--text); }
+    .sec-header p { color: var(--muted); font-size: 0.87rem; margin-top: 6px; line-height: 1.6; }
+
+    /* Policy table */
+    .policy-table { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 28px; }
+    .pt-head { background: rgba(232,197,107,0.06); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 2fr 1.5fr 1fr 1.5fr; gap: 0; }
+    .pt-head span, .pt-row span { padding: 12px 18px; font-size: 0.77rem; font-weight: 600; display: flex; align-items: center; }
+    .pt-head span { color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+    .pt-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1.5fr; border-top: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+    .pt-row:hover { background: rgba(255,255,255,0.015); }
+    .pt-row span { color: var(--text); font-size: 0.83rem; }
+    .pt-row span.pct {
+      font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 2px;
+    }
+    .pct.full { color: var(--success); }
+    .pct.high { color: #80e89c; }
+    .pct.mid { color: var(--accent); }
+    .pct.low { color: var(--warning); }
+    .pct.zero { color: var(--danger); }
+
+    .policy-note {
+      background: rgba(74,158,255,0.05); border: 1px solid rgba(74,158,255,0.15);
+      border-radius: 10px; padding: 16px 20px; margin-bottom: 28px;
+      font-size: 0.83rem; color: var(--muted); line-height: 1.6;
+    }
+    .policy-note strong { color: var(--accent2); }
+
+    /* Rule cards */
+    .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    .rule-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .rule-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .rule-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+    .rule-card p { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .rule-card.green { border-color: rgba(78,203,113,0.15); background: linear-gradient(135deg, rgba(78,203,113,0.05), var(--card)); }
+    .rule-card.yellow { border-color: rgba(232,197,107,0.15); background: linear-gradient(135deg, rgba(232,197,107,0.05), var(--card)); }
+    .rule-card.blue { border-color: rgba(74,158,255,0.15); background: linear-gradient(135deg, rgba(74,158,255,0.05), var(--card)); }
+    .rule-card.red { border-color: rgba(255,90,90,0.15); background: linear-gradient(135deg, rgba(255,90,90,0.05), var(--card)); }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: 10px; }
+    .faq-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .faq-q {
+      padding: 18px 22px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.9rem; font-weight: 500; color: var(--text);
+      user-select: none; transition: background 0.15s;
+    }
+    .faq-q:hover { background: rgba(255,255,255,0.02); }
+    .faq-q.open { color: var(--accent); border-bottom: 1px solid var(--border); }
+    .faq-chevron { font-size: 0.75rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; margin-left: 12px; }
+    .faq-q.open .faq-chevron { transform: rotate(180deg); }
+    .faq-a {
+      display: none; padding: 16px 22px;
+      font-size: 0.84rem; color: var(--muted); line-height: 1.7;
+    }
+    .faq-a.open { display: block; animation: fadeIn 0.2s ease; }
+    .faq-a ul { margin: 10px 0 0 16px; display: flex; flex-direction: column; gap: 6px; }
+    .faq-a ul li { color: var(--muted); }
+    .faq-a strong { color: var(--text); }
+
+    /* Steps guide */
+    .howto-steps { display: flex; flex-direction: column; gap: 0; }
+    .hs-item { display: flex; gap: 20px; padding: 20px 0; position: relative; }
+    .hs-item:not(:last-child)::after {
+      content: ''; position: absolute; left: 19px; top: 56px; width: 2px;
+      bottom: 0; background: var(--border);
+    }
+    .hs-num {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(232,197,107,0.08); border: 1px solid rgba(232,197,107,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.2rem; color: var(--accent);
+      position: relative; z-index: 1;
+    }
+    .hs-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 5px; }
+    .hs-content p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .hs-content a { color: var(--accent2); text-decoration: none; }
+    .hs-content a:hover { text-decoration: underline; }
+
+    /* Contact section */
+    .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .contact-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 24px 20px; text-align: center; transition: all 0.2s;
+    }
+    .contact-card:hover { border-color: rgba(232,197,107,0.2); transform: translateY(-2px); }
+    .contact-icon { font-size: 2rem; margin-bottom: 12px; }
+    .contact-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+    .contact-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+    .contact-card .contact-val { font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent); margin-top: 10px; }
+
+    .contact-form { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 28px; }
+    .contact-form h3 { font-size: 1rem; font-weight: 600; margin-bottom: 20px; }
+    .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .cf-row.single { grid-template-columns: 1fr; }
+    .cf-field { display: flex; flex-direction: column; gap: 6px; }
+    .cf-field label { font-size: 0.77rem; color: var(--muted); font-weight: 500; }
+    .cf-field input, .cf-field select, .cf-field textarea {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: var(--font-body); font-size: 0.87rem;
+      padding: 10px 14px; outline: none; transition: border-color 0.2s;
+    }
+    .cf-field input:focus, .cf-field select:focus, .cf-field textarea:focus { border-color: rgba(78,203,113,0.5); }
+    .cf-field textarea { resize: vertical; min-height: 100px; }
+    .cf-field select option { background: var(--surface); }
+    .btn-submit {
+      background: var(--success); color: #000; border: none;
+      font-family: var(--font-body); font-size: 0.87rem; font-weight: 600;
+      padding: 11px 28px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-submit:hover { background: #65df88; transform: translateY(-1px); }
+
+    /* Success message */
+    .cf-success {
+      display: none; text-align: center; padding: 32px;
+      animation: fadeIn 0.3s ease;
+    }
+    .cf-success.show { display: block; }
+    .cf-success-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .cf-success h4 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .cf-success p { font-size: 0.83rem; color: var(--muted); }
+
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 28px 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p { font-size: 0.78rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--success);
+      border-radius: 10px; padding: 14px 18px; font-size: 0.83rem;
+      color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transform: translateY(80px); opacity: 0; transition: all 0.3s; max-width: 300px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 768px) {
+      .rules-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .cf-row { grid-template-columns: 1fr; }
+      .pt-head, .pt-row { grid-template-columns: 1.5fr 1.2fr 0.8fr; }
+      .pt-head span:last-child, .pt-row span:last-child { display: none; }
+      .tab-btn { padding: 14px 14px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="14" rx="3" stroke="#e8c56b" stroke-width="1.8"/><rect x="8" y="11" width="5" height="4" rx="1" fill="#e8c56b" opacity="0.7"/><rect x="15" y="11" width="5" height="4" rx="1" fill="#e8c56b" opacity="0.7"/><path d="M7 22 L5 26 M21 22 L23 26" stroke="#e8c56b" stroke-width="1.8" stroke-linecap="round"/><path d="M4 18 H24" stroke="#e8c56b" stroke-width="1.2" opacity="0.4"/></svg>
+    RAILREFUND
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Refund Request</a>
+    <a href="status.html">Track Status</a>
+    <a href="policy.html" class="active">Policy & FAQ</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="page-hero">
+  <div class="page-label">📋 Guidelines & Support</div>
+  <h1 class="page-title">POLICY <span>&</span> FAQ</h1>
+  <p class="page-sub">Everything you need to know about ticket refunds — cancellation rules, timelines, eligibility, and contact options.</p>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="setTab('policy', this)">Refund Policy</button>
+  <button class="tab-btn" onclick="setTab('howto', this)">How It Works</button>
+  <button class="tab-btn" onclick="setTab('faq', this)" id="faq-tab-btn">FAQs</button>
+  <button class="tab-btn" onclick="setTab('contact', this)" id="contact-tab-btn">Contact Support</button>
+</div>
+
+<!-- Main -->
+<div class="main-wrap">
+
+  <!-- POLICY -->
+  <div class="tab-panel active" id="panel-policy">
+    <div class="sec-header">
+      <h2>CANCELLATION RULES</h2>
+      <p>Refund amounts are calculated based on when the cancellation request is submitted relative to the scheduled journey time.</p>
+    </div>
+
+    <div class="policy-table">
+      <div class="pt-head">
+        <span>Time Before Departure</span>
+        <span>Ticket Type</span>
+        <span>% Refunded</span>
+        <span>Cancellation Fee</span>
+      </div>
+      <div class="pt-row">
+        <span>Train Cancelled by Railways</span>
+        <span>All Classes</span>
+        <span class="pct full">100%</span>
+        <span>None</span>
+      </div>
+      <div class="pt-row">
+        <span>More than 48 Hours</span>
+        <span>All Classes</span>
+        <span class="pct high">90%</span>
+        <span>Flat ₹30–₹60 / passenger</span>
+      </div>
+      <div class="pt-row">
+        <span>12 – 48 Hours</span>
+        <span>AC Classes (1A, 2A, 3A)</span>
+        <span class="pct mid">75%</span>
+        <span>25% of fare</span>
+      </div>
+      <div class="pt-row">
+        <span>12 – 48 Hours</span>
+        <span>Non-AC (SL, 2S)</span>
+        <span class="pct mid">75%</span>
+        <span>25% of fare</span>
+      </div>
+      <div class="pt-row">
+        <span>4 – 12 Hours</span>
+        <span>All Classes</span>
+        <span class="pct low">50%</span>
+        <span>50% of fare</span>
+      </div>
+      <div class="pt-row">
+        <span>Less than 4 Hours / After Departure</span>
+        <span>All Classes</span>
+        <span class="pct zero">0%</span>
+        <span>No refund</span>
+      </div>
+      <div class="pt-row">
+        <span>Waitlisted (Not Confirmed)</span>
+        <span>All Classes</span>
+        <span class="pct high">90%</span>
+        <span>Flat cancellation fee only</span>
+      </div>
+    </div>
+
+    <div class="policy-note">
+      <strong>ℹ️ Note:</strong> Tatkal tickets have separate cancellation rules. Tatkal tickets are generally <strong>non-refundable</strong> except in cases where the train is delayed by more than 3 hours or cancelled by Railways. Premium Tatkal tickets are fully non-refundable.
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card green">
+        <div class="rule-icon">✅</div>
+        <h4>Eligible for Full Refund</h4>
+        <p>Train cancellations, government notifications, natural disasters, or berth non-availability after booking.</p>
+      </div>
+      <div class="rule-card yellow">
+        <div class="rule-icon">⚠️</div>
+        <h4>Partial Refund Cases</h4>
+        <p>Train delays exceeding 3 hours, incomplete journeys due to track disruption, or short-termination of service.</p>
+      </div>
+      <div class="rule-card blue">
+        <div class="rule-icon">💳</div>
+        <h4>Refund Payment Methods</h4>
+        <p>E-tickets refunded to source (credit card, UPI, wallet). Counter tickets receive cash refund at PRS counters.</p>
+      </div>
+      <div class="rule-card red">
+        <div class="rule-icon">❌</div>
+        <h4>Non-Refundable Situations</h4>
+        <p>Tatkal/Premium Tatkal, tickets forfeited due to misuse, fraud, or tickets after scheduled departure.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="tab-panel" id="panel-howto">
+    <div class="sec-header">
+      <h2>HOW IT WORKS</h2>
+      <p>Follow these simple steps to submit and track your train ticket refund request.</p>
+    </div>
+
+    <div class="howto-steps">
+      <div class="hs-item">
+        <div class="hs-num">1</div>
+        <div class="hs-content">
+          <h4>Gather Your Ticket Information</h4>
+          <p>Before starting, keep your PNR number, journey date, ticket type, and payment details handy. The PNR is printed on your ticket or available in your IRCTC booking confirmation email.</p>
+        </div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-num">2</div>
+        <div class="hs-content">
+          <h4>Submit the Refund Request</h4>
+          <p>Go to the <a href="index.html">Refund Request page</a> and fill in the 3-step form: ticket details, reason for cancellation, and supporting documents (if needed). The form takes under 3 minutes to complete.</p>
+        </div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-num">3</div>
+        <div class="hs-content">
+          <h4>Automated PNR Verification</h4>
+          <p>Once submitted, our system automatically verifies your PNR with the IRCTC database within 2 hours. You'll receive an SMS confirmation with your Reference ID (e.g., RR-XXXXXX).</p>
+        </div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-num">4</div>
+        <div class="hs-content">
+          <h4>Agent Review & Approval</h4>
+          <p>A refund specialist reviews your request, verifies the cancellation policy applicable, and approves the refund amount. This usually takes 12–24 hours for standard cases.</p>
+        </div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-num">5</div>
+        <div class="hs-content">
+          <h4>Refund Initiated to Your Account</h4>
+          <p>Once approved, the refund is initiated to your original payment method — UPI, bank account, credit card, or wallet. Processing typically takes 3–7 banking days depending on your bank.</p>
+        </div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-num">6</div>
+        <div class="hs-content">
+          <h4>Track Your Status Anytime</h4>
+          <p>Use the <a href="status.html">Track Status page</a> to check your refund progress at any time. Enter your Reference ID or PNR number for real-time updates. Email and SMS notifications are sent at each stage.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="tab-panel" id="panel-faq">
+    <div class="sec-header">
+      <h2>FREQUENTLY ASKED QUESTIONS</h2>
+      <p>Answers to the most common questions about the refund process.</p>
+    </div>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How long does it take to get my refund? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          Most refunds are processed within <strong>48–72 hours</strong> of submission approval. Once initiated, the actual credit to your account depends on your payment method:
+          <ul>
+            <li><strong>UPI / Wallets:</strong> Instant to 24 hours</li>
+            <li><strong>Debit Card:</strong> 3–5 banking days</li>
+            <li><strong>Credit Card:</strong> 5–7 banking days</li>
+            <li><strong>Net Banking:</strong> 3–5 banking days</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can I cancel a Tatkal ticket and get a refund? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          <strong>Tatkal tickets are generally non-refundable.</strong> However, exceptions apply:
+          <ul>
+            <li>If the train is cancelled by Railways — <strong>full refund</strong></li>
+            <li>If train is delayed by more than 3 hours — <strong>full refund</strong></li>
+            <li>If the passenger passes away — <strong>full refund with documentation</strong></li>
+          </ul>
+          Premium Tatkal tickets are fully non-refundable under all circumstances.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What documents do I need to submit? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          Document requirements vary by reason:
+          <ul>
+            <li><strong>Personal cancellation:</strong> No documents needed</li>
+            <li><strong>Medical emergency:</strong> Doctor certificate or hospital discharge summary</li>
+            <li><strong>Train cancellation/delay:</strong> No extra documents (auto-verified)</li>
+            <li><strong>Death of passenger:</strong> Death certificate</li>
+          </ul>
+          All documents should be in PDF or image format and under 5MB.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          My PNR is showing as waitlisted. Can I get a refund? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          Yes. If your ticket is still on the waitlist at the time of chart preparation (usually 4 hours before departure), it is automatically cancelled and you receive a refund minus a small flat cancellation fee. You can submit a request through this portal to expedite the process and check status.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          I booked at a counter ticket window, not online. Can I use this portal? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          Counter tickets (PRS tickets) can be submitted through this portal for tracking purposes, but the <strong>physical refund must typically be claimed at the original PRS ticket counter</strong> or any major railway station TDR (Ticket Deposit Receipt) counter. Our portal assists with the application and tracking, and you'll receive the required documentation to present at the counter.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          The status page says 'Under Review' for more than 48 hours. What should I do? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          If your request has been under review for more than 48 hours, please contact our support team:
+          <ul>
+            <li>Use the <strong>Contact Support</strong> tab on this page</li>
+            <li>Provide your Reference ID (RR-XXXXXX) for priority handling</li>
+            <li>Call our helpline: <strong>1800-XXX-XXXX</strong> (Mon–Sat, 9AM–7PM)</li>
+          </ul>
+          Complex cases (medical certificates, group bookings) may take up to 5 working days.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can I request a partial refund (e.g., for one passenger in a group booking)? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          Yes, partial cancellations are supported. In the refund form, specify the number of passengers you are cancelling for. Each passenger's fare will be calculated separately, and the refund will reflect the applicable cancellation charges for each cancelled passenger.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What is a TDR (Ticket Deposit Receipt) and when should I file one? <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-a">
+          A <strong>TDR (Ticket Deposit Receipt)</strong> is a claim filed when you are unable to travel due to exceptional circumstances or train issues. File a TDR when:
+          <ul>
+            <li>Train is more than 3 hours late</li>
+            <li>You travelled in a lower class due to unavailability of booked class</li>
+            <li>You were unable to board due to unavoidable circumstances</li>
+          </ul>
+          TDR claims must be filed within 10 days of the journey date. Use this portal to initiate your TDR claim.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="tab-panel" id="panel-contact">
+    <div class="sec-header">
+      <h2>CONTACT SUPPORT</h2>
+      <p>Our support team is available to help with refund queries, escalations, and documentation assistance.</p>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon">📞</div>
+        <h4>Helpline</h4>
+        <p>Mon–Sat, 9AM to 7PM IST. Priority line for urgent cases.</p>
+        <div class="contact-val">1800-XXX-XXXX</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">✉️</div>
+        <h4>Email Support</h4>
+        <p>Responses within 12–24 hours. Include your Reference ID.</p>
+        <div class="contact-val">support@railrefund.in</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">💬</div>
+        <h4>Live Chat</h4>
+        <p>Available on weekdays 10AM–6PM. Average wait: 3 minutes.</p>
+        <div class="contact-val">Click to Start Chat</div>
+      </div>
+    </div>
+
+    <!-- Contact form -->
+    <div class="contact-form" id="contact-form-wrap">
+      <h3>📨 Send Us a Message</h3>
+      <div class="cf-row">
+        <div class="cf-field">
+          <label>Full Name *</label>
+          <input type="text" id="cf-name" placeholder="Your name" />
+        </div>
+        <div class="cf-field">
+          <label>Mobile / Email *</label>
+          <input type="text" id="cf-contact" placeholder="Email or mobile number" />
+        </div>
+      </div>
+      <div class="cf-row">
+        <div class="cf-field">
+          <label>Reference ID (if available)</label>
+          <input type="text" id="cf-refid" placeholder="RR-XXXXXX" />
+        </div>
+        <div class="cf-field">
+          <label>Query Type *</label>
+          <select id="cf-type">
+            <option value="">Select query type</option>
+            <option>Refund Status Inquiry</option>
+            <option>Delayed Refund</option>
+            <option>Incorrect Refund Amount</option>
+            <option>Technical Issue on Portal</option>
+            <option>Document Submission</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="cf-row single">
+        <div class="cf-field">
+          <label>Message *</label>
+          <textarea id="cf-msg" placeholder="Describe your issue or query in detail..."></textarea>
+        </div>
+      </div>
+      <button class="btn-submit" onclick="submitContact()">Send Message →</button>
+    </div>
+
+    <div class="cf-success" id="cf-success">
+      <div class="cf-success-icon">✅</div>
+      <h4>Message Sent Successfully!</h4>
+      <p>Our team will respond to your query within 12–24 hours via your provided contact details. Your ticket number: <strong id="ticket-num">TKT-000000</strong></p>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2025 RailRefund Portal — Refund rules based on Indian Railways cancellation policy.</p>
+  <div class="footer-links">
+    <a href="index.html">New Refund</a>
+    <a href="status.html">Track Status</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Handle URL hash to open correct tab
+  window.addEventListener('DOMContentLoaded', () => {
+    const hash = window.location.hash;
+    if (hash === '#faq') setTab('faq', document.getElementById('faq-tab-btn'));
+    if (hash === '#contact') setTab('contact', document.getElementById('contact-tab-btn'));
+
+    // Pre-fill refund ID if available
+    const lastId = localStorage.getItem('lastRefundId');
+    if (lastId && document.getElementById('cf-refid')) {
+      document.getElementById('cf-refid').value = lastId;
+    }
+  });
+
+  function setTab(tab, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function toggleFaq(el) {
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.faq-q.open').forEach(q => {
+      q.classList.remove('open');
+      q.nextElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+      el.classList.add('open');
+      el.nextElementSibling.classList.add('open');
+    }
+  }
+
+  function submitContact() {
+    const name = document.getElementById('cf-name').value.trim();
+    const contact = document.getElementById('cf-contact').value.trim();
+    const type = document.getElementById('cf-type').value;
+    const msg = document.getElementById('cf-msg').value.trim();
+    if (!name || !contact || !type || !msg) {
+      showToast('Please fill in all required fields.'); return;
+    }
+    document.getElementById('contact-form-wrap').style.display = 'none';
+    document.getElementById('cf-success').classList.add('show');
+    document.getElementById('ticket-num').textContent = 'TKT-' + Math.floor(100000 + Math.random() * 900000);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>

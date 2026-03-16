@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RailRefund – Train Ticket Refund Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #111419;
+      --card: #161b24;
+      --border: #1e2733;
+      --accent: #e8c56b;
+      --accent2: #4a9eff;
+      --danger: #ff5a5a;
+      --success: #4ecb71;
+      --text: #e8eaf0;
+      --muted: #6b7a92;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Rail track background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 119px, rgba(255,255,255,0.012) 120px),
+        repeating-linear-gradient(180deg, transparent, transparent 59px, rgba(255,255,255,0.012) 60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,16,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--border); }
+    .nav-links a.active { color: var(--accent); background: rgba(232,197,107,0.1); }
+
+    /* ── HERO STRIP ── */
+    .hero-strip {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #0d1118 0%, #111928 50%, #0a1520 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 56px 2rem 48px;
+      text-align: center;
+    }
+    .hero-strip::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(232,197,107,0.08);
+      border: 1px solid rgba(232,197,107,0.25);
+      color: var(--accent);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      letter-spacing: 6px;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 300;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 48px;
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+    /* ── MAIN LAYOUT ── */
+    .main-wrap {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 2rem 80px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(90deg, rgba(232,197,107,0.06), transparent);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 28px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .card-header-icon {
+      width: 36px; height: 36px;
+      background: rgba(232,197,107,0.1);
+      border: 1px solid rgba(232,197,107,0.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      font-size: 1rem;
+    }
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-header p { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .card-body { padding: 28px; }
+
+    /* Steps indicator */
+    .steps {
+      display: flex; gap: 0;
+      margin-bottom: 32px;
+    }
+    .step {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 15px; left: calc(50% + 15px);
+      width: calc(100% - 30px); height: 2px;
+      background: var(--border);
+    }
+    .step.done:not(:last-child)::after,
+    .step.active:not(:last-child)::after { background: var(--accent); }
+    .step-dot {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--muted);
+      position: relative; z-index: 1;
+      transition: all 0.3s;
+    }
+    .step.done .step-dot { background: var(--accent); border-color: var(--accent); color: #000; }
+    .step.active .step-dot { border-color: var(--accent); color: var(--accent); background: rgba(232,197,107,0.1); box-shadow: 0 0 0 4px rgba(232,197,107,0.1); }
+    .step-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.5px; text-align: center; }
+    .step.active .step-label { color: var(--accent); font-weight: 500; }
+
+    /* Form sections */
+    .form-section { display: none; }
+    .form-section.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-title {
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-row.single { grid-template-columns: 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field label { font-size: 0.77rem; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; }
+    .field input, .field select, .field textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      padding: 10px 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: rgba(232,197,107,0.5);
+      box-shadow: 0 0 0 3px rgba(232,197,107,0.07);
+    }
+    .field select option { background: var(--surface); }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field-hint { font-size: 0.72rem; color: var(--muted); margin-top: -4px; }
+
+    /* Radio reason cards */
+    .reason-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .reason-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .reason-card:hover { border-color: rgba(232,197,107,0.3); background: rgba(232,197,107,0.03); }
+    .reason-card.selected { border-color: var(--accent); background: rgba(232,197,107,0.06); }
+    .reason-card input[type="radio"] { display: none; }
+    .reason-icon { font-size: 1.3rem; line-height: 1; margin-top: 2px; }
+    .reason-text strong { font-size: 0.82rem; font-weight: 600; color: var(--text); display: block; }
+    .reason-text span { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .upload-zone:hover { border-color: rgba(232,197,107,0.4); background: rgba(232,197,107,0.03); }
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-zone p { font-size: 0.82rem; color: var(--muted); }
+    .upload-zone strong { color: var(--accent); }
+    #file-input { display: none; }
+    .file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .file-item {
+      background: rgba(232,197,107,0.06);
+      border: 1px solid rgba(232,197,107,0.15);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      color: var(--accent);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .file-remove { cursor: pointer; color: var(--muted); padding: 2px 6px; }
+    .file-remove:hover { color: var(--danger); }
+
+    /* Action buttons */
+    .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #f0d080; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(232,197,107,0.25); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .btn-danger { background: rgba(255,90,90,0.1); color: var(--danger); border: 1px solid rgba(255,90,90,0.2); }
+    .btn-danger:hover { background: rgba(255,90,90,0.18); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+    /* Summary review */
+    .summary-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .summary-head {
+      background: rgba(232,197,107,0.04);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .summary-rows { padding: 4px 0; }
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 16px;
+      font-size: 0.83rem;
+    }
+    .summary-row:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .summary-row .label { color: var(--muted); }
+    .summary-row .value { color: var(--text); font-weight: 500; font-family: var(--font-mono); font-size: 0.8rem; }
+    .summary-row .value.highlight { color: var(--accent); font-size: 1rem; }
+    .summary-row .value.success { color: var(--success); }
+
+    /* Refund estimate */
+    .estimate-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .estimate-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+    .estimate-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .estimate-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--success), var(--accent2)); transition: width 0.8s ease; }
+    .estimate-range { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.72rem; color: var(--muted); }
+
+    /* Tick success */
+    .success-overlay {
+      display: none;
+      flex-direction: column; align-items: center;
+      text-align: center;
+      padding: 40px 28px;
+      animation: fadeIn 0.4s ease;
+    }
+    .success-overlay.show { display: flex; }
+    .tick-circle {
+      width: 72px; height: 72px;
+      background: rgba(78,203,113,0.1);
+      border: 2px solid var(--success);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      animation: popIn 0.4s ease;
+    }
+    @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+    .success-overlay h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+    .success-overlay p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; max-width: 300px; }
+    .refund-id {
+      margin: 20px 0 16px;
+      background: rgba(232,197,107,0.07);
+      border: 1px solid rgba(232,197,107,0.2);
+      border-radius: 8px;
+      padding: 12px 20px;
+    }
+    .refund-id-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+    .refund-id-val { font-family: var(--font-mono); font-size: 1.2rem; color: var(--accent); letter-spacing: 3px; margin-top: 4px; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .side-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .side-card-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .side-card-head span { font-size: 1rem; }
+    .side-card-body { padding: 16px 20px; }
+
+    .policy-item {
+      display: flex; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .policy-item:last-child { border: none; }
+    .policy-pct {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      min-width: 52px;
+    }
+    .policy-info strong { font-size: 0.8rem; font-weight: 600; color: var(--text); display: block; }
+    .policy-info span { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .tl-item {
+      display: flex; gap: 14px;
+      padding: 10px 0;
+      position: relative;
+    }
+    .tl-dot-wrap { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .tl-item.done .tl-dot { background: var(--success); border-color: var(--success); }
+    .tl-item.active .tl-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,197,107,0.15); }
+    .tl-line { flex: 1; width: 2px; background: var(--border); margin: 3px 0; }
+    .tl-item:last-child .tl-line { display: none; }
+    .tl-content strong { font-size: 0.8rem; font-weight: 500; color: var(--text); }
+    .tl-content span { font-size: 0.72rem; color: var(--muted); display: block; margin-top: 2px; }
+
+    .quick-links { display: flex; flex-direction: column; gap: 4px; }
+    .quick-link {
+      display: flex; justify-content: space-between; align-items: center;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      border-radius: 7px;
+      transition: all 0.2s;
+    }
+    .quick-link:hover { color: var(--text); background: var(--border); }
+    .quick-link .arrow { font-size: 0.7rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 28px 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    footer p { font-size: 0.78rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.83rem;
+      color: var(--text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s ease;
+      max-width: 300px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 768px) {
+      .main-wrap { grid-template-columns: 1fr; }
+      .sidebar { order: -1; }
+      .form-row { grid-template-columns: 1fr; }
+      .reason-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 24px; }
+      nav { padding: 0 1rem; }
+      .nav-links a { padding: 6px 10px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="8" width="20" height="14" rx="3" stroke="#e8c56b" stroke-width="1.8"/>
+      <rect x="8" y="11" width="5" height="4" rx="1" fill="#e8c56b" opacity="0.7"/>
+      <rect x="15" y="11" width="5" height="4" rx="1" fill="#e8c56b" opacity="0.7"/>
+      <path d="M7 22 L5 26 M21 22 L23 26" stroke="#e8c56b" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M4 18 H24" stroke="#e8c56b" stroke-width="1.2" opacity="0.4"/>
+    </svg>
+    RAILREFUND
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Refund Request</a>
+    <a href="status.html">Track Status</a>
+    <a href="policy.html">Policy & FAQ</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <div class="hero-tag">🚂 Indian Railways Authorized Portal</div>
+  <h1 class="hero-title">TICKET <span>REFUND</span> PORTAL</h1>
+  <p class="hero-sub">Submit your cancellation and refund request in under 3 minutes. Fully online, no station visit required.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">₹2.4Cr</div>
+      <div class="stat-label">Refunded This Month</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">48H</div>
+      <div class="stat-label">Avg Processing Time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">98.2%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">1.2L+</div>
+      <div class="stat-label">Requests Processed</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="card-header">
+      <div class="card-header-icon">🎫</div>
+      <div>
+        <h2>New Refund Request</h2>
+        <p>Fill out all three steps to submit your refund</p>
+      </div>
+    </div>
+    <div class="card-body" id="form-body">
+
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step active" id="step-1">
+          <div class="step-dot">1</div>
+          <div class="step-label">Ticket Details</div>
+        </div>
+        <div class="step" id="step-2">
+          <div class="step-dot">2</div>
+          <div class="step-label">Reason & Docs</div>
+        </div>
+        <div class="step" id="step-3">
+          <div class="step-dot">3</div>
+          <div class="step-label">Review & Submit</div>
+        </div>
+      </div>
+
+      <!-- Section 1: Ticket Details -->
+      <div class="form-section visible" id="section-1">
+        <div class="section-title">Ticket Information</div>
+        <div class="form-row">
+          <div class="field">
+            <label>PNR Number *</label>
+            <input type="text" id="pnr" placeholder="e.g. 4521367890" maxlength="10" oninput="this.value=this.value.replace(/\D/g,''); updateEstimate();" />
+            <div class="field-hint">10-digit number on your ticket</div>
+          </div>
+          <div class="field">
+            <label>Ticket Type *</label>
+            <select id="ticket-type" onchange="updateEstimate()">
+              <option value="">Select type</option>
+              <option>E-Ticket (IRCTC)</option>
+              <option>Counter Ticket (PRS)</option>
+              <option>Season Pass</option>
+              <option>Tourist Pass</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Passenger Name *</label>
+            <input type="text" id="p-name" placeholder="As on ticket" />
+          </div>
+          <div class="field">
+            <label>Travel Class *</label>
+            <select id="travel-class" onchange="updateEstimate()">
+              <option value="">Select class</option>
+              <option>1A – First AC</option>
+              <option>2A – Second AC</option>
+              <option>3A – Third AC</option>
+              <option>SL – Sleeper</option>
+              <option>CC – Chair Car</option>
+              <option>2S – Second Sitting</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Journey Date *</label>
+            <input type="date" id="journey-date" onchange="updateEstimate()" />
+          </div>
+          <div class="field">
+            <label>Ticket Fare (₹) *</label>
+            <input type="number" id="fare" placeholder="e.g. 1200" oninput="updateEstimate()" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>From Station *</label>
+            <input type="text" id="from-stn" placeholder="e.g. New Delhi (NDLS)" />
+          </div>
+          <div class="field">
+            <label>To Station *</label>
+            <input type="text" id="to-stn" placeholder="e.g. Mumbai CST (CSMT)" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Train Number / Name *</label>
+            <input type="text" id="train-no" placeholder="e.g. 12951 – Mumbai Rajdhani" />
+          </div>
+          <div class="field">
+            <label>No. of Passengers *</label>
+            <input type="number" id="num-pass" min="1" max="6" value="1" placeholder="1" oninput="updateEstimate()" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <span></span>
+          <button class="btn btn-primary" onclick="goStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- Section 2: Reason & Docs -->
+      <div class="form-section" id="section-2">
+        <div class="section-title">Reason for Refund</div>
+        <div class="reason-grid" style="margin-bottom:24px">
+          <label class="reason-card" onclick="selectReason(this, 'personal')">
+            <input type="radio" name="reason" value="personal">
+            <div class="reason-icon">👤</div>
+            <div class="reason-text"><strong>Personal Reasons</strong><span>Change of plans, personal emergency</span></div>
+          </label>
+          <label class="reason-card" onclick="selectReason(this, 'train-delay')">
+            <input type="radio" name="reason" value="train-delay">
+            <div class="reason-icon">⏱️</div>
+            <div class="reason-text"><strong>Train Delay / Cancellation</strong><span>Train delayed 3+ hours or cancelled</span></div>
+          </label>
+          <label class="reason-card" onclick="selectReason(this, 'medical')">
+            <input type="radio" name="reason" value="medical">
+            <div class="reason-icon">🏥</div>
+            <div class="reason-text"><strong>Medical Emergency</strong><span>Health condition preventing travel</span></div>
+          </label>
+          <label class="reason-card" onclick="selectReason(this, 'waitlist')">
+            <input type="radio" name="reason" value="waitlist">
+            <div class="reason-icon">📋</div>
+            <div class="reason-text"><strong>Waitlist Not Confirmed</strong><span>Ticket remained on waiting list</span></div>
+          </label>
+        </div>
+
+        <div class="section-title" style="margin-top:0">Additional Details</div>
+        <div class="form-row single" style="margin-bottom:16px">
+          <div class="field">
+            <label>Describe your reason (optional)</label>
+            <textarea id="reason-desc" placeholder="Provide any additional context or details about your refund request..."></textarea>
+          </div>
+        </div>
+
+        <div class="section-title">Supporting Documents</div>
+        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon">📎</div>
+          <p><strong>Click to upload</strong> or drag & drop files here</p>
+          <p style="margin-top:6px;font-size:0.72rem">Accepted: PDF, JPG, PNG — Max 5MB each</p>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFiles(this)">
+        <div class="file-list" id="file-list"></div>
+
+        <div class="form-row" style="margin-top:20px">
+          <div class="field">
+            <label>Bank Account / UPI for Refund *</label>
+            <input type="text" id="bank-upi" placeholder="Enter UPI ID or Account number" />
+          </div>
+          <div class="field">
+            <label>Mobile Number *</label>
+            <input type="tel" id="mobile" placeholder="10-digit mobile number" maxlength="10" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Review Request →</button>
+        </div>
+      </div>
+
+      <!-- Section 3: Review -->
+      <div class="form-section" id="section-3">
+        <div class="section-title">Review Your Request</div>
+
+        <div class="summary-block">
+          <div class="summary-head">🎫 Ticket Details</div>
+          <div class="summary-rows">
+            <div class="summary-row"><span class="label">PNR Number</span><span class="value" id="rev-pnr">—</span></div>
+            <div class="summary-row"><span class="label">Passenger Name</span><span class="value" id="rev-name">—</span></div>
+            <div class="summary-row"><span class="label">Train</span><span class="value" id="rev-train">—</span></div>
+            <div class="summary-row"><span class="label">Route</span><span class="value" id="rev-route">—</span></div>
+            <div class="summary-row"><span class="label">Journey Date</span><span class="value" id="rev-date">—</span></div>
+            <div class="summary-row"><span class="label">Class</span><span class="value" id="rev-class">—</span></div>
+          </div>
+        </div>
+
+        <div class="summary-block">
+          <div class="summary-head">💰 Refund Estimate</div>
+          <div class="summary-rows">
+            <div class="summary-row"><span class="label">Original Fare</span><span class="value" id="rev-fare">—</span></div>
+            <div class="summary-row"><span class="label">Cancellation Charges</span><span class="value" id="rev-charges" style="color:var(--danger)">—</span></div>
+            <div class="summary-row"><span class="label">Estimated Refund</span><span class="value highlight" id="rev-refund">—</span></div>
+            <div class="summary-row"><span class="label">Processing Time</span><span class="value success">48–72 Hours</span></div>
+          </div>
+        </div>
+
+        <div class="estimate-bar">
+          <div class="estimate-label">Refund percentage estimate</div>
+          <div class="estimate-track"><div class="estimate-fill" id="est-fill" style="width:75%"></div></div>
+          <div class="estimate-range"><span>0%</span><span id="est-pct">75% of fare</span><span>100%</span></div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+          <button class="btn btn-primary" onclick="submitRefund()" id="submit-btn">Submit Refund Request ✓</button>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="success-overlay" id="success-overlay">
+        <div class="tick-circle">✓</div>
+        <h3>Refund Request Submitted!</h3>
+        <p>Your request has been received and is being reviewed. You'll receive an SMS and email update within 24 hours.</p>
+        <div class="refund-id">
+          <div class="refund-id-label">Your Reference ID</div>
+          <div class="refund-id-val" id="ref-id">RR-000000</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <a href="status.html" class="btn btn-primary">Track Status →</a>
+          <button class="btn btn-ghost" onclick="resetForm()">Submit Another</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Refund Policy Quick Reference -->
+    <div class="side-card">
+      <div class="side-card-head"><span>📋</span> Refund Policy</div>
+      <div class="side-card-body">
+        <div class="policy-item">
+          <div class="policy-pct">100%</div>
+          <div class="policy-info"><strong>Train Cancelled</strong><span>Full refund if train is cancelled by Railways</span></div>
+        </div>
+        <div class="policy-item">
+          <div class="policy-pct">90%</div>
+          <div class="policy-info"><strong>48h+ Before Departure</strong><span>Cancel more than 2 days ahead</span></div>
+        </div>
+        <div class="policy-item">
+          <div class="policy-pct">75%</div>
+          <div class="policy-info"><strong>12–48 Hours Prior</strong><span>Cancel 12 to 48 hours before journey</span></div>
+        </div>
+        <div class="policy-item">
+          <div class="policy-pct">50%</div>
+          <div class="policy-info"><strong>4–12 Hours Prior</strong><span>Late cancellation window</span></div>
+        </div>
+        <div class="policy-item">
+          <div class="policy-pct">0%</div>
+          <div class="policy-info"><strong>&lt;4 Hours / After Departure</strong><span>No refund applicable</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processing Steps -->
+    <div class="side-card">
+      <div class="side-card-head"><span>⚡</span> What Happens Next</div>
+      <div class="side-card-body">
+        <div class="timeline">
+          <div class="tl-item done">
+            <div class="tl-dot-wrap"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><strong>Request Submitted</strong><span>Immediately on form submit</span></div>
+          </div>
+          <div class="tl-item active">
+            <div class="tl-dot-wrap"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><strong>PNR Verification</strong><span>Automated check — within 2 hours</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot-wrap"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><strong>Review & Approval</strong><span>Agent review — within 24 hours</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot-wrap"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><strong>Refund Initiated</strong><span>To original payment source</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot-wrap"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><strong>Amount Credited</strong><span>3–7 banking days</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="side-card">
+      <div class="side-card-head"><span>🔗</span> Quick Links</div>
+      <div class="side-card-body">
+        <div class="quick-links">
+          <a href="status.html" class="quick-link">Track Refund Status <span class="arrow">→</span></a>
+          <a href="policy.html" class="quick-link">Read Full Policy <span class="arrow">→</span></a>
+          <a href="policy.html#faq" class="quick-link">Frequently Asked Questions <span class="arrow">→</span></a>
+          <a href="policy.html#contact" class="quick-link">Contact Support <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 RailRefund Portal — Not affiliated with Indian Railways officially.</p>
+  <div class="footer-links">
+    <a href="policy.html">Privacy Policy</a>
+    <a href="policy.html">Terms of Use</a>
+    <a href="policy.html#contact">Contact</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentStep = 1;
+  let selectedReason = null;
+  let uploadedFiles = [];
+
+  function goStep(n) {
+    if (n > currentStep) {
+      if (!validateStep(currentStep)) return;
+    }
+    document.getElementById('section-' + currentStep).classList.remove('visible');
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    if (currentStep < n) document.getElementById('step-' + currentStep).classList.add('done');
+    currentStep = n;
+    document.getElementById('section-' + currentStep).classList.add('visible');
+    document.getElementById('step-' + currentStep).classList.add('active');
+    if (n === 3) populateReview();
+  }
+
+  function validateStep(step) {
+    if (step === 1) {
+      const fields = ['pnr','p-name','ticket-type','travel-class','journey-date','fare','from-stn','to-stn','train-no'];
+      for (const f of fields) {
+        if (!document.getElementById(f).value.trim()) {
+          showToast('Please fill in all required fields.');
+          document.getElementById(f).focus();
+          return false;
+        }
+      }
+      if (document.getElementById('pnr').value.length !== 10) {
+        showToast('PNR must be 10 digits.'); return false;
+      }
+    }
+    if (step === 2) {
+      if (!selectedReason) { showToast('Please select a reason for refund.'); return false; }
+      if (!document.getElementById('bank-upi').value.trim()) { showToast('Please enter UPI / bank details.'); return false; }
+      if (document.getElementById('mobile').value.length !== 10) { showToast('Please enter a valid 10-digit mobile number.'); return false; }
+    }
+    return true;
+  }
+
+  function selectReason(el, val) {
+    document.querySelectorAll('.reason-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedReason = val;
+  }
+
+  function handleFiles(input) {
+    const list = document.getElementById('file-list');
+    Array.from(input.files).forEach(f => {
+      if (f.size > 5 * 1024 * 1024) { showToast(f.name + ' exceeds 5MB limit.'); return; }
+      uploadedFiles.push(f.name);
+      const item = document.createElement('div');
+      item.className = 'file-item';
+      item.innerHTML = `<span>📄 ${f.name}</span><span class="file-remove" onclick="removeFile(this,'${f.name}')">✕</span>`;
+      list.appendChild(item);
+    });
+    input.value = '';
+  }
+
+  function removeFile(el, name) {
+    uploadedFiles = uploadedFiles.filter(f => f !== name);
+    el.parentElement.remove();
+  }
+
+  function updateEstimate() {
+    const fare = parseFloat(document.getElementById('fare').value) || 0;
+    const pass = parseInt(document.getElementById('num-pass').value) || 1;
+    const dateVal = document.getElementById('journey-date').value;
+    if (!fare || !dateVal) return;
+    const journey = new Date(dateVal);
+    const now = new Date();
+    const diffHours = (journey - now) / 36e5;
+    let pct = 0;
+    if (diffHours > 48) pct = 90;
+    else if (diffHours > 12) pct = 75;
+    else if (diffHours > 4) pct = 50;
+    const total = fare * pass;
+    const refund = Math.round(total * pct / 100);
+    document.getElementById('est-fill').style.width = pct + '%';
+    document.getElementById('est-pct').textContent = pct + '% of fare';
+  }
+
+  function populateReview() {
+    const fare = parseFloat(document.getElementById('fare').value) || 0;
+    const pass = parseInt(document.getElementById('num-pass').value) || 1;
+    const total = fare * pass;
+    const dateVal = document.getElementById('journey-date').value;
+    const journey = new Date(dateVal);
+    const diffHours = (journey - new Date()) / 36e5;
+    let pct = 0;
+    if (diffHours > 48) pct = 90;
+    else if (diffHours > 12) pct = 75;
+    else if (diffHours > 4) pct = 50;
+    const charges = Math.round(total * (1 - pct / 100));
+    const refund = total - charges;
+
+    document.getElementById('rev-pnr').textContent = document.getElementById('pnr').value;
+    document.getElementById('rev-name').textContent = document.getElementById('p-name').value;
+    document.getElementById('rev-train').textContent = document.getElementById('train-no').value;
+    document.getElementById('rev-route').textContent = `${document.getElementById('from-stn').value} → ${document.getElementById('to-stn').value}`;
+    document.getElementById('rev-date').textContent = dateVal ? new Date(dateVal).toDateString() : '—';
+    document.getElementById('rev-class').textContent = document.getElementById('travel-class').value;
+    document.getElementById('rev-fare').textContent = `₹${total.toLocaleString('en-IN')}`;
+    document.getElementById('rev-charges').textContent = `– ₹${charges.toLocaleString('en-IN')}`;
+    document.getElementById('rev-refund').textContent = `₹${refund.toLocaleString('en-IN')}`;
+    document.getElementById('est-fill').style.width = pct + '%';
+    document.getElementById('est-pct').textContent = pct + '% of fare';
+  }
+
+  function submitRefund() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    setTimeout(() => {
+      document.getElementById('section-3').classList.remove('visible');
+      document.getElementById('success-overlay').classList.add('show');
+      const id = 'RR-' + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('ref-id').textContent = id;
+      localStorage.setItem('lastRefundId', id);
+      localStorage.setItem('lastPNR', document.getElementById('pnr').value);
+    }, 1400);
+  }
+
+  function resetForm() {
+    location.reload();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>
